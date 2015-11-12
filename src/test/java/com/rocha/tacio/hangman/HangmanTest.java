@@ -1,6 +1,7 @@
 package com.rocha.tacio.hangman;
 
 import com.rocha.tacio.hangman.dictionary.DictionaryException;
+import com.rocha.tacio.hangman.dictionary.Language;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -69,9 +70,9 @@ public class HangmanTest {
     @Test
     public void recordAMiss() throws GameOverException, DictionaryException {
         Hangman hangman = new Hangman();
-        assertEquals(0, hangman.getStage());
+        assertEquals(0, hangman.getWrongPicks());
         hangman.miss();
-        assertEquals(1, hangman.getStage());
+        assertEquals(1, hangman.getWrongPicks());
     }
 
     @Test
@@ -93,6 +94,13 @@ public class HangmanTest {
                 assertTrue(hangman.isGameOver());
             }
         }
+    }
+
+    @Test
+    public void gameIsOverByVictory() throws GameOverException, DuplicateGuessException, DictionaryException {
+        Hangman hangman = new Hangman();
+        hangman.guess(hangman.getSecretWord());
+        assertTrue(hangman.isGameOver());
     }
 
     @Test(expected = GameOverException.class)
@@ -117,6 +125,84 @@ public class HangmanTest {
         hangman.guess(firstLetterInSecretWord);
     }
 
-    
+    @Test(expected = DuplicateGuessException.class)
+    public void returnWarningIfTheUserSelectsLetterAlreadyPicked() throws DictionaryException, GameOverException, DuplicateGuessException {
+        Hangman hangman = new Hangman();
+        String firstLetterInSecretWord = hangman.getSecretWord().substring(0, 1);
+        hangman.guess(firstLetterInSecretWord);
+        hangman.guess(firstLetterInSecretWord);
+        fail();
+    }
+
+    @Test
+    public void allowsToSelectDictionaryLanguage() throws DictionaryException, GameOverException, DuplicateGuessException {
+        Hangman hangman = new Hangman(Language.EN);
+    }
+
+    @Test
+    public void userCanGuessWord() throws DictionaryException, GameOverException, DuplicateGuessException {
+        Hangman hangman = new Hangman(Language.EN);
+        String secretWord = hangman.getSecretWord();
+        hangman.guess("foo");
+        assertTrue(!hangman.wordWasGuessed());
+        hangman.guess(secretWord);
+        assertTrue(hangman.wordWasGuessed());
+    }
+
+    @Test
+    public void pickingAlreadyPickedLetterForTheSecondTimeCountsAsError() throws DictionaryException, GameOverException, DuplicateGuessException {
+        Hangman hangman = new Hangman();
+        String firstLetterInSecretWord = hangman.getSecretWord().substring(0, 1);
+        hangman.guess(firstLetterInSecretWord);
+        assertEquals(0, hangman.getWrongPicks());
+        try {
+            hangman.guess(firstLetterInSecretWord);
+            assertEquals(0, hangman.getWrongPicks());
+        } catch (DuplicateGuessException e) {
+            assertEquals("You've guessed the letter '" + firstLetterInSecretWord +
+                    "' twice! Next time it'll be considered a miss.", e.getMessage());
+        }
+        hangman.guess(firstLetterInSecretWord);
+        assertEquals(1, hangman.getWrongPicks());
+    }
+
+    @Test
+    public void pickingALetterNotInWordCountsAsError() throws DictionaryException, GameOverException, DuplicateGuessException {
+        Hangman hangman = new Hangman();
+        String aLetterNotInWord = pickFirstLetterNotInWord(hangman.getSecretWord());
+        hangman.guess(aLetterNotInWord);
+        assertEquals(1, hangman.getWrongPicks());
+    }
+
+    private String pickFirstLetterNotInWord(String word) {
+        String alphabet[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r",
+                "s", "t", "u", "v", "w", "x", "y", "z"};
+        for(String letter: alphabet){
+            if (!word.toLowerCase().contains(letter)){
+                return letter;
+            }
+        }
+        return null;
+    }
+
+    @Test
+    public void pickingNonLetterCharacterCountsAsError() throws DictionaryException, GameOverException, DuplicateGuessException {
+        Hangman hangman = new Hangman();
+        hangman.guess("2");
+        hangman.guess(".");
+        hangman.guess("#");
+        assertEquals(3, hangman.getWrongPicks());
+    }
+
+    @Test
+    public void printBlanksAndLettersTest() throws DictionaryException, GameOverException, DuplicateGuessException {
+        Hangman hangman = new Hangman();
+        String secretWord = hangman.getSecretWord();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < secretWord.length(); i++) {
+            builder.append("__ ");
+        }
+        assertEquals(builder.toString(),hangman.printBlanksAndLetters());
+    }
 
 }

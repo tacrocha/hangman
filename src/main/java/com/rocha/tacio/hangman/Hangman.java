@@ -45,7 +45,7 @@ public class Hangman {
                     "    |", "    |"}
     };
 
-    private AtomicInteger count = new AtomicInteger(0);
+    private AtomicInteger wrongPicks = new AtomicInteger(0);
     private Map<String, Integer> guesses = new HashMap<>();
     private boolean victory = false;
     private SecretWordDictionary dictionary;
@@ -65,15 +65,15 @@ public class Hangman {
         if (isGameOver()) {
             throw new GameOverException("Game Over!");
         } else {
-            this.count.incrementAndGet();
+            this.wrongPicks.incrementAndGet();
         }
         if (isGameOver()) {
             throw new GameOverException("Game Over!");
         }
     }
 
-    public int getStage() {
-        return count.get();
+    public int getWrongPicks() {
+        return wrongPicks.get();
     }
 
     public int getMaxMisses() {
@@ -82,7 +82,7 @@ public class Hangman {
 
     public String printHangman() {
         StringBuilder builder = new StringBuilder();
-        for (String line : drawing[count.get()]) {
+        for (String line : drawing[wrongPicks.get()]) {
             builder.append(line);
             builder.append("\n");
         }
@@ -94,10 +94,10 @@ public class Hangman {
     }
 
     public boolean isGameOver() {
-        return !(getStage() < drawing.length - 1) || victory;
+        return !(getWrongPicks() < drawing.length - 1) || victory;
     }
 
-    public boolean isVictory() {
+    public boolean wordWasGuessed() {
         return this.victory;
     }
 
@@ -106,9 +106,9 @@ public class Hangman {
     }
 
     public void guess(String guess) throws GameOverException, DuplicateGuessException {
-        if (guess.matches("\\w{1}")) {
+        if (guess.matches("[a-zA-Z]{1}")) {
             handleGuessLetter(guess);
-        } else if (guess.matches("\\w{2,}")) {
+        } else if (guess.matches("[a-zA-Z]{2,}")) {
             handleGuessWord(guess);
         } else {
             miss();
@@ -152,57 +152,6 @@ public class Hangman {
         }
     }
 
-    private class SecretWord {
-        String word;
-        boolean[] visibleLetters;
 
-        SecretWord(String word) {
-            this.word = word;
-            visibleLetters = new boolean[word.length()];
-        }
-
-        boolean isLetterPresent(String letter) {
-            return word.toLowerCase().contains(letter.toLowerCase());
-        }
-
-        boolean[] updateVisibleLetters(String guessedLetter) {
-            for (int i = 0; i < word.length(); i++) {
-                String letterInWord = String.valueOf(word.charAt(i));
-                if (guessedLetter.equalsIgnoreCase(letterInWord)) {
-                    visibleLetters[i] = true;
-                }
-            }
-            return visibleLetters;
-        }
-
-        void showAllLetters() {
-            for (int i = 0; i < word.length(); i++) {
-                visibleLetters[i] = true;
-            }
-        }
-
-        boolean foundAllLetters() {
-            boolean res = true;
-            for (boolean visible : visibleLetters) {
-                if (!visible) {
-                    res = false;
-                }
-            }
-            return res;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < word.length(); i++) {
-                if (visibleLetters[i]) {
-                    builder.append(" ").append(word.toUpperCase().charAt(i)).append(" ");
-                } else {
-                    builder.append("__ ");
-                }
-            }
-            return builder.toString();
-        }
-    }
 
 }

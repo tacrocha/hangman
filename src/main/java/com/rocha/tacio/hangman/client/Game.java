@@ -39,7 +39,7 @@ public class Game {
             }
         }
 
-        if (hangman.isVictory()) {
+        if (hangman.wordWasGuessed()) {
             System.out.println("Victory! You guessed the secret word: " + hangman.getSecretWord());
         }
     }
