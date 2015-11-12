@@ -1,5 +1,6 @@
 Hangman in Java
 
+<pre>
  __________
 |          |
 |        wwwwww
@@ -15,3 +16,4 @@ Hangman in Java
 |      /       \
 |
 |
+</pre>
