@@ -1,9 +1,9 @@
 package com.rocha.tacio.hangman.dictionary;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +20,8 @@ public class SecretWordDictionaryImpl implements SecretWordDictionary {
 
     public SecretWordDictionaryImpl() throws DictionaryException {
         try {
-            String path = getClass().getClassLoader().getResource("englishWords.txt").getFile();
-            dictionaries.put(Language.EN, loadFromFile(path));
+            URL url = getClass().getResource("englishWords.txt");
+            dictionaries.put(Language.EN, loadFromFile(url));
         } catch (IOException e) {
             throw new DictionaryException(e);
         }
@@ -43,9 +43,9 @@ public class SecretWordDictionaryImpl implements SecretWordDictionary {
         return this.dictionaries.get(language);
     }
 
-    private List<String> loadFromFile(String file) throws IOException {
+    private List<String> loadFromFile(URL url) throws IOException {
         List<String> words = new ArrayList<>();
-        BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
         String line;
         while ((line = reader.readLine()) != null) {
             words.add(line.trim());

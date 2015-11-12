@@ -12,36 +12,36 @@ import java.util.Scanner;
  */
 public class Game {
 
-    private static Hangman hangman;
-
     public static void main(String[] args) {
 
         try {
-            hangman = new Hangman();
+            Hangman hangman = new Hangman();
+            while (!hangman.isGameOver()) {
+                System.out.println(hangman.printHangman());
+                System.out.println(hangman.printBlanksAndLetters());
+
+                Scanner scanner = new Scanner(System.in);
+                System.out.print("Pick a letter or guess a word: ");
+                String guess = scanner.nextLine();
+                try {
+                    hangman.guess(guess);
+                } catch (GameOverException e) {
+                    System.out.println(hangman.printHangman());
+                    System.out.println("Game over! Secret word was: " + hangman.getSecretWord());
+                } catch (DuplicateGuessException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+
+            if (hangman.wordWasGuessed()) {
+                System.out.println(hangman.printHangman());
+                System.out.println(hangman.printBlanksAndLetters());
+                System.out.println("Victory! You guessed the secret word!");
+            }
         } catch (DictionaryException e) {
             System.out.println("Failed to start game. Could not load dictionary.");
         }
 
-        while (!hangman.isGameOver()) {
-            System.out.println(hangman.printHangman());
-            System.out.println(hangman.printBlanksAndLetters());
-
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("Pick a letter or guess a word: ");
-            String guess = scanner.nextLine();
-            try {
-                hangman.guess(guess);
-            } catch (GameOverException e) {
-                System.out.println(hangman.printHangman());
-                System.out.println("Game over! Secret word was: " + hangman.getSecretWord());
-            } catch (DuplicateGuessException e) {
-                System.out.println(e.getMessage());
-            }
-        }
-
-        if (hangman.wordWasGuessed()) {
-            System.out.println("Victory! You guessed the secret word: " + hangman.getSecretWord());
-        }
     }
 
 }
